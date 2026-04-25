@@ -1,5 +1,5 @@
 
-**Project:** RTD-MTA v3.0.0 — Ransomware Traffic Detector / Malware Traffic Analyzer **Date:** April 23, 2026 **Objective:** Demonstrate threshold tuning to reduce false positive alerts on benign traffic without compromising detection of real threats.
+**Project:** RTD-MTA v3.0.0  Ransomware Traffic Detector / Malware Traffic Analyzer **Date:** April 23, 2026 **Objective:** Demonstrate threshold tuning to reduce false positive alerts on benign traffic without compromising detection of real threats.
 
 ---
 
@@ -9,7 +9,7 @@ A detection system is only as good as its signal-to-noise ratio. Even the best r
 
 ---
 
-## Step 1 — Download a Benign PCAP
+## Step 1  Download a Benign PCAP
 
 A clean HTTP capture was pulled directly from Wireshark's official sample library. This represents normal, real-world browser traffic and serves as the ground truth for measuring false positive rate.
 
@@ -21,11 +21,11 @@ wget -O data/pcaps/benign/normal_traffic.pcap \
   "https://wiki.wireshark.org/uploads/27707187aeb30df68e70c8fb9d614981/http.cap"
 ```
 
-The file downloaded successfully at 25.20 KB — a small but representative HTTP session captured from a Windows XP era client.
+The file downloaded successfully at 25.20 KB  a small but representative HTTP session captured from a Windows XP era client.
 
 ---
 
-## Step 2 — Baseline Run (BEFORE Tuning)
+## Step 2  Baseline Run (BEFORE Tuning)
 
 With the benign PCAP in place, RTD-MTA was run in offline mode to establish the baseline false positive count.
 
@@ -39,7 +39,7 @@ grep "NEW ALERT" logs/benign_before.log | wc -l
 grep "NEW ALERT" logs/benign_before.log
 ```
 
-Both alerts fired on rule **RTD-006 (Suspicious User-Agent String)** — the PCAP contains a Firefox 1.6 user-agent string from 2004 which the signature engine flagged as anomalous. Since this is a known clean capture, both are false positives.
+Both alerts fired on rule **RTD-006 (Suspicious User-Agent String)**  the PCAP contains a Firefox 1.6 user-agent string from 2004 which the signature engine flagged as anomalous. Since this is a known clean capture, both are false positives.
 
 ```
 NEW ALERT [MEDIUM]: Suspicious User-Agent String | http_user_agent=Mozilla/5.0
@@ -49,7 +49,7 @@ NEW ALERT [MEDIUM]: Suspicious User-Agent String | http_user_agent=Mozilla/5.0
 (Windows; U; Windows NT 5.1; en-US; rv:1.6) Gecko/20040113 | 145.254.160.237→216.239.59.99
 ```
 
-The same source IP triggered the rule twice — once per destination. The two requests went to different destinations, so deduplication treated them as separate events.
+The same source IP triggered the rule twice  once per destination. The two requests went to different destinations, so deduplication treated them as separate events.
 
 **Baseline FP count: 2**
 ![](Screenshot_2026-04-24_06_14_54.png)
@@ -62,7 +62,7 @@ _Terminal output showing the baseline analysis completion and alert generation_
 
 ---
 
-## Step 3 — Review and Edit the Configuration
+## Step 3  Review and Edit the Configuration
 
 The config file `config/settings.yaml` was opened to inspect current threshold values before making changes.
 
@@ -72,14 +72,14 @@ nano config/settings.yaml
 
 Two sections were relevant: the `detection` block (behavioral thresholds) and the `alerting` block (deduplication window). The screenshots below show the key parts of the config before tuning.
 ![](Screenshot_2026-04-24_06_15_06.png)
- Detection thresholds before tuning — port scan at 25, volume std-dev at 3.0
+ Detection thresholds before tuning  port scan at 25, volume std-dev at 3.0
  
 ![](Screenshot_2026-04-24_06_15_09.png)
-Alerting dedup window set to 30 seconds — this is the root cause of the duplicate FP
+Alerting dedup window set to 30 seconds  this is the root cause of the duplicate FP
 
 ### Changes Made
 
-The root cause of the duplicate alert was the **deduplication window** in the `alerting` section. At 30 seconds, it was too short — the same user-agent fired on two different destinations within milliseconds, so dedup did not catch it. Raising the window to 60 seconds collapses those into a single event.
+The root cause of the duplicate alert was the **deduplication window** in the `alerting` section. At 30 seconds, it was too short  the same user-agent fired on two different destinations within milliseconds, so dedup did not catch it. Raising the window to 60 seconds collapses those into a single event.
 
 |Parameter|Before|After|Reason|
 |---|---|---|---|
@@ -92,7 +92,7 @@ The root cause of the duplicate alert was the **deduplication window** in the `a
 
 ---
 
-## Step 4 — Re-run After Tuning (AFTER)
+## Step 4  Re-run After Tuning (AFTER)
 
 ```bash
 python3 main.py --mode offline \
@@ -103,9 +103,9 @@ grep "NEW ALERT" logs/benign_after.log | wc -l
 ```
 
 ![](Screenshot_2026-04-24_06_15_16.png)
-Alert manager now initialized with dedup_window=60s — the key change_
+Alert manager now initialized with dedup_window=60s  the key change_
 ![](Screenshot_2026-04-24_06_15_20.png)
-grep count after tuning returns 1 — down from 2
+grep count after tuning returns 1  down from 2
 
 ### Result
 
@@ -113,7 +113,7 @@ grep count after tuning returns 1 — down from 2
 |---|---|---|
 |Alerts on benign PCAP|2|1|
 |Alert type|RTD-006 (Medium)|RTD-006 (Medium)|
-|Reduction|—|**50%**|
+|Reduction||**50%**|
 
 **False Positive Reduction: 50%** Formula: `(2 - 1) / 2 × 100 = 50%`
 
@@ -121,13 +121,13 @@ The deduplication window change collapsed the two near-identical alerts (same ru
 
 ---
 
-## Step 5 — Verify Real Threat Detection Still Works
+## Step 5  Verify Real Threat Detection Still Works
 
 To confirm the tuning did not break legitimate detection, a synthetic malicious PCAP was generated using Scapy with three distinct attack patterns:
 
-- **Port scan** — 59 SYN packets to sequential ports from a single source
-- **C2 beaconing** — 10 connections to a known-bad external IP (185.220.101.5)
-- **DNS tunneling** — DNS queries with long encoded subdomains to a `.ru` C2 domain
+- **Port scan**  59 SYN packets to sequential ports from a single source
+- **C2 beaconing**  10 connections to a known-bad external IP (185.220.101.5)
+- **DNS tunneling**  DNS queries with long encoded subdomains to a `.ru` C2 domain
 
 ![](Screenshot_2026-04-24_06_15_45.png)
 _Attempting to download sample PCAPs and preparing the malicious simulation environment_
@@ -167,13 +167,13 @@ python3 main.py --mode offline \
 ```
 
 ![](Screenshot_2026-04-24_06_15_26.png)
-_Scapy script output — 74 packets written across three attack simulations_
+_Scapy script output  74 packets written across three attack simulations_
 
 ![](Screenshot_2026-04-24_06_15_50.png)
 _Terminal view of the Scapy synthetic packet generation script execution_
 
 ![](Screenshot_2026-04-24_06_15_34.png)
-_12 NEW ALERT hits — port scan and high connection rate detected across all targets_
+_12 NEW ALERT hits  port scan and high connection rate detected across all targets_
 
 ![](Screenshot_2026-04-24_06_15_55.png)
 _Detailed terminal output showing all 12 malicious alerts captured after tuning_
@@ -203,15 +203,15 @@ NEW ALERT [MEDIUM]: Port Scan Detected    | unique_ports=60 ports        | 192.1
 
 |Scenario|Alert Count|Notes|
 |---|---|---|
-|Benign traffic — BEFORE tuning|2|Both FPs from old Firefox user-agent|
-|Benign traffic — AFTER tuning|1|50% reduction via dedup window|
-|Malicious traffic — AFTER tuning|12|All attack vectors detected|
+|Benign traffic  BEFORE tuning|2|Both FPs from old Firefox user-agent|
+|Benign traffic  AFTER tuning|1|50% reduction via dedup window|
+|Malicious traffic  AFTER tuning|12|All attack vectors detected|
 
-Threshold tuning reduced false positive noise by 50% while leaving real detection completely intact. The remaining alert on benign traffic is technically a valid signature match — the 2004 user-agent string genuinely is anomalous. Eliminating it entirely would require a whitelist entry for that pattern, which is a separate tuning decision outside the scope of this exercise.
+Threshold tuning reduced false positive noise by 50% while leaving real detection completely intact. The remaining alert on benign traffic is technically a valid signature match  the 2004 user-agent string genuinely is anomalous. Eliminating it entirely would require a whitelist entry for that pattern, which is a separate tuning decision outside the scope of this exercise.
 
 ---
 
-## Appendix — Full Config Screenshots
+## Appendix  Full Config Screenshots
 
 These screenshots show the complete `config/settings.yaml` as reviewed during Step 3.
 
