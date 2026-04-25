@@ -1,16 +1,16 @@
 
 
-**Project:** RTD-MTA v3.0.0 — Ransomware Traffic Detector / Malware Traffic Analyzer **Date:** April 24, 2026 **Objective:** Measure the packet parsing throughput and per-packet latency of the RTD-MTA pipeline under a synthetic load of 10,000 HTTP packets to establish a performance baseline.
+**Project:** RTD-MTA v3.0.0  Ransomware Traffic Detector / Malware Traffic Analyzer **Date:** April 24, 2026 **Objective:** Measure the packet parsing throughput and per-packet latency of the RTD-MTA pipeline under a synthetic load of 10,000 HTTP packets to establish a performance baseline.
 
 ---
 
 ## Overview
 
-A detection system that can't keep up with real network traffic is useless in production. Before deploying RTD-MTA in any live environment, it's important to know how fast the packet parser actually runs — how many packets per second it can sustain, what the typical per-packet cost is, and where the tail latency sits. This demo creates a controlled synthetic workload and measures all of that.
+A detection system that can't keep up with real network traffic is useless in production. Before deploying RTD-MTA in any live environment, it's important to know how fast the packet parser actually runs  how many packets per second it can sustain, what the typical per-packet cost is, and where the tail latency sits. This demo creates a controlled synthetic workload and measures all of that.
 
 ---
 
-## Step 1 — Create the Benchmark Script
+## Step 1  Create the Benchmark Script
 
 The benchmark script was written to `scripts/benchmark.py`. It generates 10,000 synthetic HTTP GET packets using Scapy, passes each one through `PacketParser`, and records per-packet timing with `time.perf_counter()` for nanosecond-level precision.
 
@@ -77,7 +77,7 @@ EOF
 ![](Screenshot_2026-04-24_07_15_27.png)
 ### Import Path Fix
 
-The original script referenced `src.parsing.packet_parser` which does not exist — the correct module path is `src.parser.packet_parser`. Additionally, several parser source files used bare imports (`from parser.`, `from utils.`) that were written assuming a different `sys.path` context. These were fixed before the benchmark could run:
+The original script referenced `src.parsing.packet_parser` which does not exist  the correct module path is `src.parser.packet_parser`. Additionally, several parser source files used bare imports (`from parser.`, `from utils.`) that were written assuming a different `sys.path` context. These were fixed before the benchmark could run:
 
 ```bash
 # Fix benchmark script
@@ -95,7 +95,7 @@ grep -r "from utils\." src/ --include="*.py" -l | \
 ![](Screenshot_2026-04-24_07_15_33.png)
 ---
 
-## Step 2 — Run the Benchmark
+## Step 2  Run the Benchmark
 
 ```bash
 export PYTHONPATH=$(pwd)
@@ -141,23 +141,23 @@ Max latency:       111.669ms
 
 ### Throughput
 
-At **1,229 packets/second**, the parser can handle roughly 1.2K pps in single-threaded Python on this machine. For context, a typical 100 Mbps office network carrying mixed HTTP traffic generates somewhere between 1,000 and 5,000 pps depending on packet size. RTD-MTA's offline mode on a single thread sits at the lower end of that range — acceptable for PCAP analysis and low-traffic segments, but would need the multi-worker configuration (`worker_threads: 4` in the config) for busier links.
+At **1,229 packets/second**, the parser can handle roughly 1.2K pps in single-threaded Python on this machine. For context, a typical 100 Mbps office network carrying mixed HTTP traffic generates somewhere between 1,000 and 5,000 pps depending on packet size. RTD-MTA's offline mode on a single thread sits at the lower end of that range  acceptable for PCAP analysis and low-traffic segments, but would need the multi-worker configuration (`worker_threads: 4` in the config) for busier links.
 
 ### Latency Distribution
 
-The **median of 0.597ms** is the number that matters most for steady-state operation — more than half of all packets are processed in under 600 microseconds. The mean of 0.812ms is pulled up by occasional slower packets, which shows up clearly in the tail:
+The **median of 0.597ms** is the number that matters most for steady-state operation  more than half of all packets are processed in under 600 microseconds. The mean of 0.812ms is pulled up by occasional slower packets, which shows up clearly in the tail:
 
 - p95 at 1.848ms means 1 in 20 packets takes nearly 2ms
 - p99 at 2.745ms means 1 in 100 takes nearly 3ms
 - The **max of 111.669ms** is a significant outlier
 
-The 111ms spike is almost certainly a garbage collection pause or the first-time JIT cost on a cold code path — the kind of one-off latency hit that appears in the first few hundred packets as the Python interpreter warms up and the parser encounters new packet shapes for the first time. In production, this would smooth out over longer runs.
+The 111ms spike is almost certainly a garbage collection pause or the first-time JIT cost on a cold code path  the kind of one-off latency hit that appears in the first few hundred packets as the Python interpreter warms up and the parser encounters new packet shapes for the first time. In production, this would smooth out over longer runs.
 
 ### What This Means in Practice
 
-The benchmark ran in offline mode — no alert manager, no enrichment lookups, no database writes, no YARA scanning. Each of those adds overhead on top of the 0.812ms base parsing cost. In a full live pipeline run with all engines active, realworld throughput would be lower than 1,229 pps, but the parser itself is not the bottleneck.
+The benchmark ran in offline mode  no alert manager, no enrichment lookups, no database writes, no YARA scanning. Each of those adds overhead on top of the 0.812ms base parsing cost. In a full live pipeline run with all engines active, realworld throughput would be lower than 1,229 pps, but the parser itself is not the bottleneck.
 
-The config's `worker_threads: 4` setting exists precisely for this — four parallel parsing workers would push throughput to roughly 4,000–5,000 pps, which comfortably covers most deployment scenarios.
+The config's `worker_threads: 4` setting exists precisely for this  four parallel parsing workers would push throughput to roughly 4,000–5,000 pps, which comfortably covers most deployment scenarios.
 
 ---
 
