@@ -1,4 +1,4 @@
-# RTD-MTA — Finding Reports
+# RTD-MTA  Finding Reports
 
 **Project:** Ransomware Traffic Detector / Malware Traffic Analyzer v3.0.0  
 **Author:** Manjil Katuwal (Hiro001)  
@@ -6,7 +6,7 @@
 
 ---
 
-This folder contains hands-on demonstration reports for RTD-MTA. Each report documents a real test run — with actual terminal output, screenshots, and analysis — showing the system working against live traffic, synthetic attack simulations, and real malware PCAPs.
+This folder contains hands-on demonstration reports for RTD-MTA. Each report documents a real test run  with actual terminal output, screenshots, and analysis  showing the system working against live traffic, synthetic attack simulations, and real malware PCAPs.
 
 These are not theoretical write-ups. Every result shown was produced by running the tool.
 
@@ -15,35 +15,35 @@ These are not theoretical write-ups. Every result shown was produced by running 
 ## Reports
 
 ### 1. Multi-Engine Threat Analysis (The Money Shot)
-> The core detection demo. RTD-MTA is run against a real malicious PCAP. Multiple detection engines fire simultaneously — signature matching, behavioral analysis, DGA detection, and C2 beaconing — producing a full incident report with MITRE ATT&CK mappings.
+> The core detection demo. RTD-MTA is run against a real malicious PCAP. Multiple detection engines fire simultaneously  signature matching, behavioral analysis, DGA detection, and C2 beaconing  producing a full incident report with MITRE ATT&CK mappings.
 
 📄 [Read Report](multi-engine-threat-analysis/report.md)
 
 ---
 
 ### 2. SOC Analyst TUI (Terminal User Interface)
-> The live dashboard demo. Shows the Rich terminal UI running in real time — the 4-panel layout with live alert feed, top talkers, protocol distribution, and PPS sparkline. Demonstrates what a Tier 1 SOC analyst sees during an active monitoring session.
+> The live dashboard demo. Shows the Rich terminal UI running in real time  the 4-panel layout with live alert feed, top talkers, protocol distribution, and PPS sparkline. Demonstrates what a Tier 1 SOC analyst sees during an active monitoring session.
 
 📄 [Read Report](soc-analyst-tui/report.md)
 
 ---
 
-### 3. Applied ML & AI — Isolation Forest Training
-> The ML pipeline demo. Trains the Isolation Forest baseline model on normal traffic, then validates it detects anomalies. Shows feature extraction, model serialisation, and threshold calibration — the full training-to-detection cycle.
+### 3. Applied ML & AI  Isolation Forest Training
+> The ML pipeline demo. Trains the Isolation Forest baseline model on normal traffic, then validates it detects anomalies. Shows feature extraction, model serialisation, and threshold calibration  the full training-to-detection cycle.
 
 📄 [Read Report](ml-isolation-forest-training/report.md)
 
 ---
 
 ### 4. False Positive Tuning
-> The analyst workflow demo. Runs RTD-MTA against a known-clean Wireshark sample PCAP, measures the baseline false positive count, tunes the deduplication window and behavioral thresholds in config/settings.yaml, and re-runs to show a 50% FP reduction — without breaking real threat detection.
+> The analyst workflow demo. Runs RTD-MTA against a known-clean Wireshark sample PCAP, measures the baseline false positive count, tunes the deduplication window and behavioral thresholds in config/settings.yaml, and re-runs to show a 50% FP reduction  without breaking real threat detection.
 
 📄 [Read Report](false-positive-tuning/report.md)
 
 ---
 
 ### 5. Unit Test Coverage Report
-> The code quality demo. Runs the full 233-test pytest suite with pytest-cov coverage measurement across src/. Documents 231 passing tests, 2 failures (import path mismatch — not logic bugs), and 56% total coverage with a module-by-module breakdown of what is covered and what needs work.
+> The code quality demo. Runs the full 233-test pytest suite with pytest-cov coverage measurement across src/. Documents 231 passing tests, 2 failures (import path mismatch  not logic bugs), and 56% total coverage with a module-by-module breakdown of what is covered and what needs work.
 
 📄 [Read Report](unit-test-coverage/report.md)
 
@@ -69,4 +69,4 @@ These are not theoretical write-ups. Every result shown was produced by running 
 
 ---
 
-*RTD-MTA v3.0.0 — Built by Manjil Katuwal (Hiro001)*
+*RTD-MTA v3.0.0  Built by Manjil Katuwal (Hiro001)*
