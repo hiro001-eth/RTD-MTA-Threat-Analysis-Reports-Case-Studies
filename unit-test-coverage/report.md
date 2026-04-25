@@ -1,6 +1,8 @@
 
 
-**Project:** RTD-MTA v3.0.0  Ransomware Traffic Detector / Malware Traffic Analyzer **Date:** April 24, 2026 **Objective:** Run the full test suite with coverage reporting to measure how much of the codebase is exercised by existing tests, identify gaps, and document the current state of test health.
+**Project:** RTD-MTA v3.0.0  Ransomware Traffic Detector / Malware Traffic Analyzer 
+**Date:** April 24, 2026 
+**Objective:** Run the full test suite with coverage reporting to measure how much of the codebase is exercised by existing tests, identify gaps, and document the current state of test health.
 
 ---
 
